@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Mark attendance{% endblock %}
+{% block content %}
+<h3 class="mb-3">Mark attendance</h3>
+<form method="get" class="row g-2 align-items-end mb-4">
+  <div class="col-md-4"><label class="form-label">Class</label>{{ form.school_class }}</div>
+  <div class="col-md-3"><label class="form-label">Date</label>{{ form.date }}</div>
+  <div class="col-auto"><button class="btn btn-outline-primary">Load students</button></div>
+  {% for e in form.errors.values %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+</form>
+
+{% if school_class %}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><strong>{{ school_class }}</strong> · {{ date|date:"l, j F Y" }} · {{ students|length }} students</span>
+    <div class="btn-group btn-group-sm">
+      <button type="button" class="btn btn-outline-success" onclick="setAll('P')">All present</button>
+      <button type="button" class="btn btn-outline-danger" onclick="setAll('A')">All absent</button>
+    </div>
+  </div>
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="school_class" value="{{ school_class.pk }}">
+    <input type="hidden" name="date" value="{{ date|date:'Y-m-d' }}">
+    <table class="table table-sm mb-0 align-middle">
+      <thead><tr><th>Roll</th><th>Student</th><th>Status</th><th>Remarks</th></tr></thead>
+      {% for s in students %}
+      <tr>
+        <td>{{ s.roll_no }}</td>
+        <td>{{ s }}</td>
+        <td>
+          <div class="btn-group btn-group-sm" role="group">
+            {% for value, label in statuses %}
+            <input type="radio" class="btn-check status-radio" name="status_{{ s.pk }}" id="s{{ s.pk }}{{ value }}" value="{{ value }}" {% if s.current_status == value %}checked{% endif %}>
+            <label class="btn {% if value == 'P' %}btn-outline-success{% elif value == 'A' %}btn-outline-danger{% else %}btn-outline-warning{% endif %}" for="s{{ s.pk }}{{ value }}">{{ label }}</label>
+            {% endfor %}
+          </div>
+        </td>
+        <td><input class="form-control form-control-sm" name="remarks_{{ s.pk }}" value="{{ s.current_remarks }}" placeholder="optional"></td>
+      </tr>
+      {% empty %}<tr><td colspan="4" class="text-muted">No students in this class.</td></tr>{% endfor %}
+    </table>
+    {% if students %}<div class="card-body border-top"><button class="btn btn-primary">Save attendance</button></div>{% endif %}
+  </form>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+function setAll(v) { document.querySelectorAll('.status-radio[value="' + v + '"]').forEach(r => r.checked = true); }
+</script>
+{% endblock %}

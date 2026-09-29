@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Academic years{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Academic years</h3>
+  <a class="btn btn-primary" href="{% url 'year_add' %}"><i class="bi bi-plus-lg"></i> Add year</a>
+</div>
+<div class="card" style="max-width: 760px"><table class="table table-hover mb-0 align-middle">
+  <thead><tr><th>Name</th><th>Start</th><th>End</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for y in object_list %}
+  <tr><td>{{ y.name }}</td><td>{{ y.start_date }}</td><td>{{ y.end_date }}</td>
+    <td>{% if y.is_current %}<span class="badge bg-success">Current</span>{% endif %}</td>
+    <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'year_edit' y.pk %}">Edit</a> <a class="btn btn-sm btn-outline-danger" href="{% url 'year_delete' y.pk %}">Delete</a></td></tr>
+  {% empty %}<tr><td colspan="5" class="text-muted">No academic years yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}{{ exam }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h3 class="mb-0">{{ exam.name }} · {{ exam.school_class }}</h3>
+    <span class="text-muted">{{ exam.start_date }} – {{ exam.end_date }}</span>
+    {% if exam.is_published %}<span class="badge bg-success">Published</span>{% else %}<span class="badge bg-secondary">Draft — not visible to students</span>{% endif %}
+  </div>
+  {% if user.is_admin %}<div><a class="btn btn-outline-secondary" href="{% url 'exam_edit' exam.pk %}">Edit / publish</a> <a class="btn btn-outline-danger" href="{% url 'exam_delete' exam.pk %}">Delete</a></div>{% endif %}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card"><div class="card-header">Subjects</div>
+      <table class="table table-sm mb-0 align-middle">
+        <thead><tr><th>Subject</th><th>Max</th><th>Pass</th><th>Date</th><th>Entered</th><th></th></tr></thead>
+        {% for es in subjects %}
+        <tr>
+          <td>{{ es.subject }}</td><td>{{ es.max_marks|floatformat:0 }}</td><td>{{ es.pass_marks|floatformat:0 }}</td><td>{{ es.exam_date|default:'—' }}</td>
+          <td>{{ es.entered }}/{{ student_count }}</td>
+          <td class="text-end text-nowrap">
+            {% if es.can_enter %}<a class="btn btn-sm btn-primary" href="{% url 'marks_entry' es.pk %}">Marks</a>{% endif %}
+            {% if user.is_admin %}<form class="d-inline" method="post" action="{% url 'exam_subject_delete' es.pk %}" onsubmit="return confirm('Remove {{ es.subject }} and its marks?')">{% csrf_token %}<button class="btn btn-sm btn-link text-danger"><i class="bi bi-x-lg"></i></button></form>{% endif %}
+          </td>
+        </tr>
+        {% empty %}<tr><td colspan="6" class="text-muted">No subjects added yet.</td></tr>{% endfor %}
+      </table>
+      {% if user.is_admin %}
+      <div class="card-body border-top">
+        {% if form.fields.subject.queryset %}
+        <form method="post">{% csrf_token %}{% include 'includes/form.html' %}<button class="btn btn-sm btn-primary mt-2">Add subject</button></form>
+        {% else %}<div class="text-muted small">All subjects assigned to this class have been added. (Subjects come from the class's subject list.)</div>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card"><div class="card-header">Results (max {{ results.maximum|floatformat:0 }})</div>
+      <table class="table table-sm table-hover mb-0">
+        <thead><tr><th>Rank</th><th>Student</th><th>Total</th><th>%</th><th>Grade</th><th></th></tr></thead>
+        {% for r in results.results %}
+        <tr><td>{{ r.rank }}</td><td>{{ r.student }}</td><td>{{ r.obtained|floatformat:1 }}</td><td>{{ r.percentage }}</td><td><span class="badge bg-secondary">{{ r.grade }}</span></td>
+          <td class="text-end"><a href="{% url 'report_card' exam.pk r.student.pk %}">Report card</a></td></tr>
+        {% empty %}<tr><td colspan="6" class="text-muted">No students.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

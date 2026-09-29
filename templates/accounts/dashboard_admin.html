@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Admin dashboard</h3>
+  <span class="text-muted">{{ today|date:"l, j F Y" }}</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Students</div><div class="value">{{ student_count }}</div><a href="{% url 'student_list' %}" class="small">Manage</a></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Teachers</div><div class="value">{{ teacher_count }}</div><a href="{% url 'teacher_list' %}" class="small">Manage</a></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Classes</div><div class="value">{{ class_count }}</div><a href="{% url 'class_list' %}" class="small">Manage</a></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Subjects</div><div class="value">{{ subject_count }}</div><a href="{% url 'subject_list' %}" class="small">Manage</a></div></div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="card stat-card border-success"><div class="card-body">
+    <div class="text-muted small">Attendance today</div>
+    {% if attendance_today.total %}
+      <div class="value text-success">{{ attendance_today.percentage }}%</div>
+      <div class="small">{{ attendance_today.present }} present · {{ attendance_today.late }} late · {{ attendance_today.absent }} absent</div>
+    {% else %}
+      <div class="value text-muted">—</div><div class="small">Not marked yet</div>
+    {% endif %}
+  </div></div></div>
+  <div class="col-md-4"><div class="card stat-card border-primary"><div class="card-body">
+    <div class="text-muted small">Fees collected this month</div>
+    <div class="value text-primary">{{ month_collected|floatformat:2 }}</div>
+    <a href="{% url 'payment_list' %}" class="small">View payments</a>
+  </div></div></div>
+  <div class="col-md-4"><div class="card stat-card border-danger"><div class="card-body">
+    <div class="text-muted small">Total outstanding dues</div>
+    <div class="value text-danger">{{ total_outstanding|floatformat:2 }}</div>
+    <a href="{% url 'dues_report' %}" class="small">Dues report</a>
+  </div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card"><div class="card-header d-flex justify-content-between"><span>Recent payments</span><a href="{% url 'payment_add' %}" class="small">+ Record</a></div>
+      <table class="table table-sm mb-0">
+        {% for p in recent_payments %}
+        <tr><td><a href="{% url 'receipt' p.pk %}">{{ p.receipt_no }}</a></td><td>{{ p.student }}</td><td>{{ p.paid_on }}</td><td class="text-end">{{ p.amount }}</td></tr>
+        {% empty %}<tr><td class="text-muted">No payments yet.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card"><div class="card-header d-flex justify-content-between"><span>Upcoming exams</span><a href="{% url 'exam_add' %}" class="small">+ Add</a></div>
+      <table class="table table-sm mb-0">
+        {% for e in upcoming_exams %}
+        <tr><td><a href="{% url 'exam_detail' e.pk %}">{{ e.name }}</a></td><td>{{ e.school_class }}</td><td>{{ e.start_date }} – {{ e.end_date }}</td><td>{% if e.is_published %}<span class="badge bg-success">Published</span>{% endif %}</td></tr>
+        {% empty %}<tr><td class="text-muted">No upcoming exams.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

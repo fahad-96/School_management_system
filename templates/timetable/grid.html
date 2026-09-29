@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">{{ title }}</h3>
+  <button class="btn btn-outline-secondary btn-sm d-print-none" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+</div>
+{% if not rows %}
+<div class="alert alert-info">No time slots defined yet.{% if user.is_admin %} <a href="{% url 'slot_add' %}">Add time slots</a> first.{% endif %}</div>
+{% else %}
+<div class="card table-responsive mb-4">
+  <table class="table table-bordered timetable mb-0">
+    <thead class="table-light"><tr><th style="min-width:130px">Time</th>{% for _, name in days %}<th>{{ name }}</th>{% endfor %}</tr></thead>
+    {% for row in rows %}
+    <tr class="{% if row.slot.is_break %}slot-break{% endif %}">
+      <th class="text-nowrap">{{ row.slot.name }}<br><small class="text-muted fw-normal">{{ row.slot.start_time|time:"H:i" }}–{{ row.slot.end_time|time:"H:i" }}</small></th>
+      {% if row.slot.is_break %}<td colspan="{{ days|length }}">Break</td>
+      {% else %}
+        {% for p in row.cells %}
+        <td>
+          {% if p %}
+            <div class="fw-semibold">{{ p.class_subject.subject }}</div>
+            {% if show_teacher %}<div class="text-muted small">{{ p.class_subject.teacher|default:'—' }}</div>{% endif %}
+            {% if show_class %}<div class="text-muted small">{{ p.school_class }}</div>{% endif %}
+            {% if user.is_admin and school_class %}<form method="post" action="{% url 'period_delete' p.pk %}" class="d-print-none" onsubmit="return confirm('Remove this period?')">{% csrf_token %}<button class="btn btn-link btn-sm text-danger p-0"><i class="bi bi-x"></i></button></form>{% endif %}
+          {% endif %}
+        </td>
+        {% endfor %}
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+
+{% if form %}
+<div class="card d-print-none" style="max-width: 760px">
+  <div class="card-header">Add period</div>
+  <div class="card-body">
+    {% if form.fields.class_subject.queryset %}
+    <form method="post">{% csrf_token %}{% include 'includes/form.html' %}<button class="btn btn-primary mt-3">Add period</button></form>
+    {% else %}<div class="text-muted">Assign subjects to this class first on the <a href="{% url 'class_detail' school_class.pk %}">class page</a>.</div>{% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

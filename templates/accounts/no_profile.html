@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="alert alert-warning">
+  <h5><i class="bi bi-exclamation-triangle"></i> No profile linked to this account</h5>
+  Your login exists but it is not linked to a {{ user.get_role_display|lower }} record yet. Please ask the school administrator to complete your profile.
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Parents{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Parents</h3>
+  <a class="btn btn-primary" href="{% url 'parent_add' %}"><i class="bi bi-plus-lg"></i> Add parent</a>
+</div>
+<div class="card"><table class="table table-hover mb-0 align-middle">
+  <thead><tr><th>Name</th><th>Username</th><th>Phone</th><th>Children</th><th></th></tr></thead>
+  <tbody>
+  {% for p in object_list %}
+  <tr>
+    <td>{{ p }}</td><td>{{ p.user.username }}</td><td>{{ p.user.phone }}</td>
+    <td>{% for c in p.children.all %}<a href="{% url 'student_detail' c.pk %}">{{ c }}</a> ({{ c.school_class }}){% if not forloop.last %}, {% endif %}{% empty %}<span class="text-muted">none linked</span>{% endfor %}</td>
+    <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'parent_edit' p.pk %}">Edit</a> <a class="btn btn-sm btn-outline-danger" href="{% url 'parent_delete' p.pk %}">Delete</a></td>
+  </tr>
+  {% empty %}<tr><td colspan="5" class="text-muted">No parents yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

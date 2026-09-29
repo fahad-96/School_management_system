@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Attendance report{% endblock %}
+{% block content %}
+<h3 class="mb-3">Attendance report</h3>
+<form method="get" class="row g-2 align-items-end mb-4 d-print-none">
+  <div class="col-md-4"><label class="form-label">Class</label>{{ form.school_class }}</div>
+  <div class="col-md-3"><label class="form-label">Month</label>{{ form.month }}</div>
+  <div class="col-auto"><button class="btn btn-outline-primary">Show</button></div>
+</form>
+
+{% if rows %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h5 class="mb-0">{{ school_class }} · {{ month_label }}</h5>
+  <span>Class average: <strong>{{ overall.percentage }}%</strong> over {{ days|length }} marked days
+    <button class="btn btn-sm btn-outline-secondary ms-2 d-print-none" onclick="window.print()"><i class="bi bi-printer"></i></button></span>
+</div>
+<div class="card table-responsive">
+  <table class="table table-bordered table-attendance mb-0">
+    <thead class="table-light"><tr><th class="text-start">Student</th>{% for d in days %}<th>{{ d }}</th>{% endfor %}<th>P</th><th>L</th><th>A</th><th>%</th></tr></thead>
+    {% for r in rows %}
+    <tr>
+      <td class="text-start text-nowrap"><a href="{% url 'attendance_student' r.student.pk %}">{{ r.student }}</a></td>
+      {% for c in r.cells %}<td class="status-{{ c }}">{{ c }}</td>{% endfor %}
+      <td>{{ r.summary.present }}</td><td>{{ r.summary.late }}</td><td>{{ r.summary.absent }}</td><td><strong>{{ r.summary.percentage }}</strong></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% elif form.is_bound and form.is_valid %}
+<div class="alert alert-info">No attendance recorded for {{ school_class }} in {{ month_label }}.</div>
+{% endif %}
+{% endblock %}

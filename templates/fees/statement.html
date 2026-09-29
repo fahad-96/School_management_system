@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Fees · {{ student }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h3 class="mb-0">Fee statement · {{ student }}</h3><span class="text-muted">{{ student.school_class }} · {{ student.admission_no }}</span></div>
+  {% if user.is_admin %}<a class="btn btn-primary" href="{% url 'payment_add' %}?student={{ student.pk }}">Record payment</a>{% endif %}
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Total fees</div><div class="value">{{ fees.total|floatformat:2 }}</div></div></div></div>
+  <div class="col-md-4"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Paid</div><div class="value text-success">{{ fees.paid|floatformat:2 }}</div></div></div></div>
+  <div class="col-md-4"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Balance due</div><div class="value {% if fees.due > 0 %}text-danger{% else %}text-success{% endif %}">{{ fees.due|floatformat:2 }}</div></div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-5"><div class="card"><div class="card-header">Fees applicable ({{ student.school_class }})</div>
+    <table class="table table-sm mb-0">
+      {% for f in fees.structures %}<tr><td>{{ f.get_category_display }} {{ f.description }}</td><td class="text-muted">due {{ f.due_date }}</td><td class="text-end">{{ f.amount }}</td></tr>
+      {% empty %}<tr><td class="text-muted">No fees defined for this class.</td></tr>{% endfor %}
+    </table></div></div>
+  <div class="col-lg-7"><div class="card"><div class="card-header">Payments</div>
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Receipt</th><th>Date</th><th>Towards</th><th>Method</th><th class="text-end">Amount</th></tr></thead>
+      {% for p in fees.payments %}<tr><td><a href="{% url 'receipt' p.pk %}">{{ p.receipt_no }}</a></td><td>{{ p.paid_on }}</td><td>{{ p.fee_structure|default:'General' }}</td><td>{{ p.get_method_display }}</td><td class="text-end">{{ p.amount }}</td></tr>
+      {% empty %}<tr><td colspan="5" class="text-muted">No payments yet.</td></tr>{% endfor %}
+    </table></div></div>
+</div>
+{% endblock %}

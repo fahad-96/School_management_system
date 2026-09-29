@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Classes{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Classes</h3>
+  {% if user.is_admin %}<a class="btn btn-primary" href="{% url 'class_add' %}"><i class="bi bi-plus-lg"></i> Add class</a>{% endif %}
+</div>
+<div class="card"><table class="table table-hover mb-0 align-middle">
+  <thead><tr><th>Class</th><th>Academic year</th><th>Class teacher</th><th>Room</th><th>Students</th><th></th></tr></thead>
+  <tbody>
+  {% for c in object_list %}
+  <tr>
+    <td><a href="{% url 'class_detail' c.pk %}">{{ c }}</a></td>
+    <td>{{ c.academic_year }}</td>
+    <td>{{ c.class_teacher|default:'—' }}</td>
+    <td>{{ c.room }}</td>
+    <td>{{ c.students.count }}</td>
+    <td class="text-end">
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'class_timetable' c.pk %}">Timetable</a>
+      {% if user.is_admin %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'class_edit' c.pk %}">Edit</a>{% endif %}
+    </td>
+  </tr>
+  {% empty %}<tr><td colspan="6" class="text-muted">No classes yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

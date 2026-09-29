@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Welcome, {{ teacher }}</h3>
+  <span class="text-muted">{{ today|date:"l, j F Y" }}</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card mb-3">
+      <div class="card-header">My classes</div>
+      <table class="table table-sm mb-0 align-middle">
+        {% for c in classes %}
+        <tr>
+          <td><a href="{% url 'class_detail' c.pk %}">{{ c }}</a> {% if c.class_teacher == teacher %}<span class="badge bg-info text-dark">Class teacher</span>{% endif %}</td>
+          <td class="text-end">
+            {% if c.marked_today %}<span class="badge bg-success">Attendance marked</span>
+            {% else %}<a class="btn btn-sm btn-outline-primary" href="{% url 'attendance_mark' %}?school_class={{ c.pk }}&date={{ today|date:'Y-m-d' }}">Mark attendance</a>{% endif %}
+          </td>
+        </tr>
+        {% empty %}<tr><td class="text-muted">You are not assigned to any class yet.</td></tr>{% endfor %}
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-header">Upcoming exams</div>
+      <table class="table table-sm mb-0">
+        {% for e in upcoming_exams %}
+        <tr><td><a href="{% url 'exam_detail' e.pk %}">{{ e.name }}</a></td><td>{{ e.school_class }}</td><td>{{ e.start_date }} – {{ e.end_date }}</td></tr>
+        {% empty %}<tr><td class="text-muted">No upcoming exams.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between"><span>Today's periods</span><a class="small" href="{% url 'timetable_me' %}">Full timetable</a></div>
+      <table class="table table-sm mb-0">
+        {% for p in periods_today %}
+        <tr><td>{{ p.slot.start_time|time:"H:i" }}–{{ p.slot.end_time|time:"H:i" }}</td><td>{{ p.slot.name }}</td><td>{{ p.school_class }}</td><td>{{ p.class_subject.subject }}</td></tr>
+        {% empty %}<tr><td class="text-muted">No periods today.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

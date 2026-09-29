@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Receipt {{ payment.receipt_no }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-end mb-2 d-print-none">
+  <button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+</div>
+<div class="card report-card" style="max-width: 640px">
+  <div class="card-body p-4">
+    <div class="text-center mb-4">
+      <h4 class="mb-0"><i class="bi bi-mortarboard-fill text-primary"></i> School Manager</h4>
+      <div class="text-muted">Fee Receipt</div>
+    </div>
+    <table class="table table-sm">
+      <tr><th style="width:40%">Receipt no.</th><td><strong>{{ payment.receipt_no }}</strong></td></tr>
+      <tr><th>Date</th><td>{{ payment.paid_on }}</td></tr>
+      <tr><th>Student</th><td>{{ payment.student }} ({{ payment.student.admission_no }})</td></tr>
+      <tr><th>Class</th><td>{{ payment.student.school_class }}</td></tr>
+      <tr><th>Towards</th><td>{{ payment.fee_structure|default:'General fees' }}</td></tr>
+      <tr><th>Method</th><td>{{ payment.get_method_display }}{% if payment.reference %} · {{ payment.reference }}{% endif %}</td></tr>
+      <tr class="table-light"><th>Amount received</th><td class="fs-5 fw-bold">{{ payment.amount }}</td></tr>
+      {% if payment.note %}<tr><th>Note</th><td>{{ payment.note }}</td></tr>{% endif %}
+      <tr><th>Received by</th><td>{{ payment.received_by|default:'—' }}</td></tr>
+    </table>
+    <div class="d-flex justify-content-between mt-4 d-print-none">
+      <a href="{% url 'fee_statement' payment.student.pk %}">View statement</a>
+      {% if user.is_admin %}<a href="{% url 'payment_add' %}?student={{ payment.student.pk }}">Record another payment</a>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

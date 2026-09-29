@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Report card · {{ student }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-end mb-2 d-print-none">
+  <button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+</div>
+<div class="card report-card">
+  <div class="card-body p-4">
+    <div class="text-center mb-4">
+      <h4 class="mb-0"><i class="bi bi-mortarboard-fill text-primary"></i> School Manager</h4>
+      <div class="text-muted">Report Card · {{ exam.name }} · {{ exam.school_class.academic_year }}</div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-6"><strong>Student:</strong> {{ student }}<br><strong>Class:</strong> {{ student.school_class }} &nbsp; <strong>Roll:</strong> {{ student.roll_no }}</div>
+      <div class="col-6 text-end"><strong>Admission no:</strong> {{ student.admission_no }}<br><strong>Exam dates:</strong> {{ exam.start_date }} – {{ exam.end_date }}</div>
+    </div>
+    <table class="table table-bordered">
+      <thead class="table-light"><tr><th>Subject</th><th class="text-end">Max</th><th class="text-end">Score</th><th class="text-end">%</th><th>Grade</th><th>Result</th><th>Remarks</th></tr></thead>
+      {% for r in card.rows %}
+      <tr>
+        <td>{{ r.subject }}</td><td class="text-end">{{ r.max_marks|floatformat:0 }}</td>
+        <td class="text-end">{% if r.score is not None %}{{ r.score|floatformat:1 }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+        <td class="text-end">{{ r.percentage|default_if_none:'—' }}</td><td>{{ r.grade }}</td>
+        <td>{% if r.passed is True %}<span class="text-success">Pass</span>{% elif r.passed is False %}<span class="text-danger">Fail</span>{% endif %}</td>
+        <td class="small">{{ r.remarks }}</td>
+      </tr>
+      {% endfor %}
+      <tr class="table-light fw-bold"><td>Total</td><td class="text-end">{{ card.maximum|floatformat:0 }}</td><td class="text-end">{{ card.obtained|floatformat:1 }}</td><td class="text-end">{{ card.percentage }}</td><td>{{ card.grade }}</td><td colspan="2">{% if rank %}Rank {{ rank }}{% endif %}</td></tr>
+    </table>
+    {% if not card.complete %}<div class="alert alert-warning small py-2">Some subjects do not have marks entered yet.</div>{% endif %}
+    <div class="row mt-5 text-center small text-muted">
+      <div class="col-4">Class teacher</div><div class="col-4">Parent / Guardian</div><div class="col-4">Principal</div>
+    </div>
+    <div class="text-muted small mt-3 text-end">Generated {{ today }}</div>
+  </div>
+</div>
+{% endblock %}

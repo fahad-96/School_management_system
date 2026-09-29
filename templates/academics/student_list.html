@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Students</h3>
+  {% if user.is_admin %}<a class="btn btn-primary" href="{% url 'student_add' %}"><i class="bi bi-plus-lg"></i> Add student</a>{% endif %}
+</div>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-4"><input class="form-control" name="q" value="{{ q }}" placeholder="Search name / admission no"></div>
+  <div class="col-md-3">
+    <select class="form-select" name="class">
+      <option value="">All classes</option>
+      {% for c in classes %}<option value="{{ c.pk }}" {% if selected_class == c.pk|stringformat:'s' %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><button class="btn btn-outline-secondary">Filter</button></div>
+</form>
+<div class="card"><table class="table table-hover mb-0 align-middle">
+  <thead><tr><th>Admission</th><th>Name</th><th>Class</th><th>Roll</th><th>Parent</th><th>Phone</th><th></th></tr></thead>
+  <tbody>
+  {% for s in object_list %}
+  <tr>
+    <td>{{ s.admission_no }}</td>
+    <td><a href="{% url 'student_detail' s.pk %}">{{ s }}</a></td>
+    <td>{{ s.school_class }}</td>
+    <td>{{ s.roll_no }}</td>
+    <td>{{ s.parent|default:'—' }}</td>
+    <td>{{ s.user.phone }}</td>
+    <td class="text-end">{% if user.is_admin %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'student_edit' s.pk %}">Edit</a>{% endif %}</td>
+  </tr>
+  {% empty %}<tr><td colspan="7" class="text-muted">No students found.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% with query='q='|add:q|add:'&class='|add:selected_class|add:'&' %}{% include 'includes/pagination.html' %}{% endwith %}
+{% endblock %}

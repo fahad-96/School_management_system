@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Teachers{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Teachers</h3>
+  {% if user.is_admin %}<a class="btn btn-primary" href="{% url 'teacher_add' %}"><i class="bi bi-plus-lg"></i> Add teacher</a>{% endif %}
+</div>
+<div class="card"><table class="table table-hover mb-0 align-middle">
+  <thead><tr><th>Employee ID</th><th>Name</th><th>Subjects</th><th>Phone</th><th>Email</th><th></th></tr></thead>
+  <tbody>
+  {% for t in object_list %}
+  <tr>
+    <td>{{ t.employee_id }}</td>
+    <td><a href="{% url 'teacher_detail' t.pk %}">{{ t }}</a></td>
+    <td>{% for s in t.subjects.all %}<span class="badge bg-light text-dark border">{{ s }}</span> {% endfor %}</td>
+    <td>{{ t.user.phone }}</td>
+    <td>{{ t.user.email }}</td>
+    <td class="text-end">
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'teacher_timetable' t.pk %}">Timetable</a>
+      {% if user.is_admin %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'teacher_edit' t.pk %}">Edit</a>
+      <a class="btn btn-sm btn-outline-danger" href="{% url 'teacher_delete' t.pk %}">Delete</a>{% endif %}
+    </td>
+  </tr>
+  {% empty %}<tr><td colspan="6" class="text-muted">No teachers yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

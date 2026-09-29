@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Dues report{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h3 class="mb-0">Dues report</h3><span class="text-muted">Total outstanding: <strong class="text-danger">{{ total_due|floatformat:2 }}</strong> across {{ rows|length }} students</span></div>
+  <div class="d-print-none">
+    {% if show_all %}<a class="btn btn-outline-secondary btn-sm" href="?">Only outstanding</a>{% else %}<a class="btn btn-outline-secondary btn-sm" href="?all=1">Show all students</a>{% endif %}
+    <button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="bi bi-printer"></i></button>
+  </div>
+</div>
+<div class="card"><table class="table table-hover table-sm mb-0 align-middle">
+  <thead><tr><th>Student</th><th>Class</th><th>Parent phone</th><th class="text-end">Total</th><th class="text-end">Paid</th><th class="text-end">Due</th><th class="d-print-none"></th></tr></thead>
+  {% for r in rows %}
+  <tr>
+    <td><a href="{% url 'student_detail' r.student.pk %}">{{ r.student }}</a></td><td>{{ r.student.school_class }}</td>
+    <td>{{ r.student.parent.user.phone|default:'—' }}</td>
+    <td class="text-end">{{ r.total|floatformat:2 }}</td><td class="text-end">{{ r.paid|floatformat:2 }}</td>
+    <td class="text-end {% if r.due > 0 %}text-danger fw-bold{% else %}text-success{% endif %}">{{ r.due|floatformat:2 }}</td>
+    <td class="text-end d-print-none"><a class="btn btn-sm btn-outline-primary" href="{% url 'payment_add' %}?student={{ r.student.pk }}">Collect</a></td>
+  </tr>
+  {% empty %}<tr><td colspan="7" class="text-muted">No outstanding dues. 🎉</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Attendance · {{ student }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h3 class="mb-0">Attendance · {{ student }}</h3><span class="text-muted">{{ student.school_class }}</span></div>
+  <form method="get" class="d-flex gap-2 d-print-none">
+    <input type="month" class="form-control form-control-sm" name="month" value="{{ month }}">
+    <button class="btn btn-sm btn-outline-primary">Filter</button>
+    {% if month %}<a class="btn btn-sm btn-link" href="?">All</a>{% endif %}
+  </form>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Attendance</div><div class="value">{{ summary.percentage }}%</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Present</div><div class="value text-success">{{ summary.present }}</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Late</div><div class="value text-warning">{{ summary.late }}</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><div class="text-muted small">Absent</div><div class="value text-danger">{{ summary.absent }}</div></div></div></div>
+</div>
+<div class="card" style="max-width: 760px"><table class="table table-sm mb-0">
+  <thead><tr><th>Date</th><th>Status</th><th>Remarks</th><th>Marked by</th></tr></thead>
+  {% for r in records %}
+  <tr><td>{{ r.date|date:"D, j M Y" }}</td><td class="status-{{ r.status }}">{{ r.get_status_display }}</td><td>{{ r.remarks }}</td><td class="text-muted">{{ r.marked_by|default:'' }}</td></tr>
+  {% empty %}<tr><td colspan="4" class="text-muted">No attendance records.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

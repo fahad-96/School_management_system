@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Sign in · School Manager{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5 col-lg-4">
+    <div class="text-center mb-4">
+      <i class="bi bi-mortarboard-fill display-4 text-primary"></i>
+      <h3 class="mt-2">School Manager</h3>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        {% if form.errors %}<div class="alert alert-danger">Invalid username or password.</div>{% endif %}
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3"><label class="form-label">Username</label>{{ form.username }}</div>
+          <div class="mb-3"><label class="form-label">Password</label>{{ form.password }}</div>
+          <input type="hidden" name="next" value="{{ next }}">
+          <button class="btn btn-primary w-100">Sign in</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

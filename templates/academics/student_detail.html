@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}{{ student }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h3 class="mb-0">{{ student }}</h3><span class="text-muted">{{ student.school_class }} · Roll {{ student.roll_no }} · {{ student.admission_no }}</span></div>
+  {% if user.is_admin %}
+  <div>
+    <a class="btn btn-outline-secondary" href="{% url 'student_edit' student.pk %}">Edit</a>
+    <a class="btn btn-outline-primary" href="{% url 'payment_add' %}?student={{ student.pk }}">Record payment</a>
+    <a class="btn btn-outline-danger" href="{% url 'student_delete' student.pk %}">Delete</a>
+  </div>
+  {% endif %}
+</div>
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card"><div class="card-header">Profile</div>
+      <table class="table table-sm mb-0">
+        <tr><th>Username</th><td>{{ student.user.username }}</td></tr>
+        <tr><th>Email</th><td>{{ student.user.email|default:'—' }}</td></tr>
+        <tr><th>Phone</th><td>{{ student.user.phone|default:'—' }}</td></tr>
+        <tr><th>Gender</th><td>{{ student.get_gender_display|default:'—' }}</td></tr>
+        <tr><th>Date of birth</th><td>{{ student.date_of_birth|default:'—' }}</td></tr>
+        <tr><th>Admitted on</th><td>{{ student.admitted_on|default:'—' }}</td></tr>
+        <tr><th>Parent</th><td>{% if student.parent %}{{ student.parent }} ({{ student.parent.user.phone|default:'no phone' }}){% else %}—{% endif %}</td></tr>
+        <tr><th>Address</th><td>{{ student.address|default:'—'|linebreaksbr }}</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="row g-3">
+      <div class="col-sm-6"><div class="card stat-card"><div class="card-body">
+        <div class="text-muted small">Attendance</div><div class="value">{{ attendance.percentage }}%</div>
+        <div class="small">{{ attendance.present }} P · {{ attendance.late }} L · {{ attendance.absent }} A</div>
+        <a class="small" href="{% url 'attendance_student' student.pk %}">Full report</a>
+      </div></div></div>
+      <div class="col-sm-6"><div class="card stat-card"><div class="card-body">
+        <div class="text-muted small">Fees due</div><div class="value {% if fees.due > 0 %}text-danger{% else %}text-success{% endif %}">{{ fees.due|floatformat:2 }}</div>
+        <div class="small">Paid {{ fees.paid|floatformat:2 }} / {{ fees.total|floatformat:2 }}</div>
+        <a class="small" href="{% url 'fee_statement' student.pk %}">Statement</a>
+      </div></div></div>
+      <div class="col-12"><div class="card"><div class="card-header">Exams</div>
+        <table class="table table-sm mb-0">
+          {% for e in exams %}<tr><td>{{ e.name }}</td><td>{{ e.start_date }}</td><td>{% if e.is_published %}<span class="badge bg-success">Published</span>{% else %}<span class="badge bg-secondary">Draft</span>{% endif %}</td><td class="text-end"><a href="{% url 'report_card' e.pk student.pk %}">Report card</a></td></tr>
+          {% empty %}<tr><td class="text-muted">No exams.</td></tr>{% endfor %}
+        </table>
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

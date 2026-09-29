@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="mb-0">{{ student }}</h3>
+    <span class="text-muted">{{ student.school_class }} · Roll no. {{ student.roll_no }} · Admission {{ student.admission_no }}</span>
+  </div>
+  <span class="text-muted">{{ today|date:"l, j F Y" }}</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="card stat-card border-success"><div class="card-body">
+    <div class="text-muted small">Attendance</div>
+    <div class="value text-success">{{ attendance.percentage }}%</div>
+    <div class="small">{{ attendance.present }} present · {{ attendance.late }} late · {{ attendance.absent }} absent of {{ attendance.total }} days</div>
+    <a class="small" href="{% url 'attendance_student' student.pk %}">Details</a>
+  </div></div></div>
+  <div class="col-md-4"><div class="card stat-card border-danger"><div class="card-body">
+    <div class="text-muted small">Fees due</div>
+    <div class="value {% if fees.due > 0 %}text-danger{% else %}text-success{% endif %}">{{ fees.due|floatformat:2 }}</div>
+    <div class="small">Paid {{ fees.paid|floatformat:2 }} of {{ fees.total|floatformat:2 }}</div>
+    <a class="small" href="{% url 'fee_statement' student.pk %}">Statement</a>
+  </div></div></div>
+  <div class="col-md-4"><div class="card stat-card border-primary"><div class="card-body">
+    <div class="text-muted small">Latest result</div>
+    {% with results|first as latest %}
+      {% if latest %}<div class="value text-primary">{{ latest.1.percentage }}% <small class="fs-6">({{ latest.1.grade }})</small></div><div class="small">{{ latest.0.name }}</div>
+      {% else %}<div class="value text-muted">—</div><div class="small">No published results</div>{% endif %}
+    {% endwith %}
+    <a class="small" href="{% url 'results_me' %}">All results</a>
+  </div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card"><div class="card-header d-flex justify-content-between"><span>Today's periods</span><a class="small" href="{% url 'class_timetable' student.school_class_id %}">Full timetable</a></div>
+      <table class="table table-sm mb-0">
+        {% for p in periods_today %}
+        <tr><td>{{ p.slot.start_time|time:"H:i" }}–{{ p.slot.end_time|time:"H:i" }}</td><td>{{ p.class_subject.subject }}</td><td class="text-muted">{{ p.class_subject.teacher|default:'' }}</td></tr>
+        {% empty %}<tr><td class="text-muted">No periods today.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card"><div class="card-header">Recent results</div>
+      <table class="table table-sm mb-0">
+        {% for exam, card in results %}
+        <tr><td><a href="{% url 'report_card' exam.pk student.pk %}">{{ exam.name }}</a></td><td>{{ card.obtained|floatformat:0 }} / {{ card.maximum|floatformat:0 }}</td><td>{{ card.percentage }}%</td><td><span class="badge bg-secondary">{{ card.grade }}</span></td></tr>
+        {% empty %}<tr><td class="text-muted">No published results yet.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

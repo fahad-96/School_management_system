@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ school_class }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h3 class="mb-0">{{ school_class }}</h3><span class="text-muted">{{ school_class.academic_year }} · Class teacher: {{ school_class.class_teacher|default:'—' }}{% if school_class.room %} · Room {{ school_class.room }}{% endif %}</span></div>
+  <div>
+    <a class="btn btn-outline-secondary" href="{% url 'class_timetable' school_class.pk %}">Timetable</a>
+    <a class="btn btn-outline-secondary" href="{% url 'attendance_mark' %}?school_class={{ school_class.pk }}">Attendance</a>
+    {% if user.is_admin %}<a class="btn btn-outline-secondary" href="{% url 'class_edit' school_class.pk %}">Edit</a>
+    <a class="btn btn-outline-danger" href="{% url 'class_delete' school_class.pk %}">Delete</a>{% endif %}
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card"><div class="card-header">Students ({{ students|length }})</div>
+      <table class="table table-sm table-hover mb-0">
+        <thead><tr><th>Roll</th><th>Name</th><th>Admission</th><th>Phone</th></tr></thead>
+        {% for s in students %}<tr><td>{{ s.roll_no }}</td><td><a href="{% url 'student_detail' s.pk %}">{{ s }}</a></td><td>{{ s.admission_no }}</td><td>{{ s.user.phone }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-muted">No students in this class.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card"><div class="card-header">Subjects &amp; teachers</div>
+      <table class="table table-sm mb-0 align-middle">
+        {% for cs in class_subjects %}
+        <tr><td>{{ cs.subject }}</td><td>{{ cs.teacher|default:'<span class="text-muted">unassigned</span>' }}</td>
+          <td class="text-end">{% if user.is_admin %}<form method="post" action="{% url 'class_subject_delete' cs.pk %}" onsubmit="return confirm('Remove {{ cs.subject }}?')">{% csrf_token %}<button class="btn btn-sm btn-link text-danger p-0"><i class="bi bi-x-lg"></i></button></form>{% endif %}</td></tr>
+        {% empty %}<tr><td class="text-muted">No subjects assigned.</td></tr>{% endfor %}
+      </table>
+      {% if user.is_admin and form.fields.subject.queryset %}
+      <div class="card-body border-top">
+        <form method="post" class="row g-2 align-items-end">{% csrf_token %}
+          <div class="col-5"><label class="form-label small">Subject</label>{{ form.subject }}</div>
+          <div class="col-5"><label class="form-label small">Teacher</label>{{ form.teacher }}</div>
+          <div class="col-2"><button class="btn btn-primary btn-sm w-100">Add</button></div>
+          {% for e in form.errors.values %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

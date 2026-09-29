@@ -1,0 +1,28 @@
+# Render Blueprint: in the Render dashboard choose New > Blueprint, pick this repository and click Apply.
+# Every push to main redeploys the site.
+services:
+  - type: web
+    name: school-management-system
+    runtime: python
+    plan: free
+    # The free plan has no persistent disk: the SQLite database built here, with the demo school and
+    # its logins, is what every start begins from. Changes made on the live site last until the next
+    # restart or deploy (the free plan also restarts after about 15 idle minutes).
+    buildCommand: >-
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --no-input &&
+      python manage.py migrate --no-input &&
+      python manage.py seed_demo
+    # The database check is a fallback in case it was not carried over from the build.
+    startCommand: >-
+      ([ -f db.sqlite3 ] || (python manage.py migrate --no-input && python manage.py seed_demo)) &&
+      gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --access-logfile -
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.12
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_TIME_ZONE
+        value: Asia/Kolkata

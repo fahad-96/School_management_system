@@ -45,6 +45,37 @@ To start with an empty school instead, skip `seed_demo` and run `python manage.p
 python manage.py test
 ```
 
+## Deploy on Render (free)
+The repo includes a Render Blueprint ([`render.yaml`](render.yaml)) with the build and start commands
+and every setting, so nothing needs configuring by hand.
+
+1. Sign in at [render.com](https://render.com) with GitHub.
+2. Choose **New → Blueprint**, pick this repository and click **Apply**.
+3. When the first deploy finishes, open the `onrender.com` address shown on the service page and sign in
+   with the demo logins above.
+
+Every push to `main` redeploys the site.
+
+On the free plan:
+- The site sleeps after 15 minutes without visitors, and the next visit takes up to a minute to wake it.
+- There is no persistent disk. Each deploy builds a fresh SQLite database with the demo school, and every
+  restart (including waking from sleep) starts from it again, so changes made on the live site are
+  temporary. Real use needs the database somewhere permanent (a paid persistent disk or PostgreSQL),
+  which takes a small settings change.
+- The demo logins are public in this README, so anyone with the address can sign in. Use it for testing,
+  not for real student data.
+
+### Environment variables
+Without these the app runs in local development mode. `render.yaml` sets them on Render.
+
+| Variable | Production value |
+|---|---|
+| `DJANGO_DEBUG` | `0` |
+| `DJANGO_SECRET_KEY` | A long random string (the Blueprint generates one) |
+| `DJANGO_ALLOWED_HOSTS` | Your own domains, comma-separated. The `onrender.com` address is allowed automatically |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | Only for a custom domain: `https://` and the domain, comma-separated |
+| `DJANGO_TIME_ZONE` | Defaults to `Asia/Kolkata` |
+
 ## Project layout
 ```
 config/       settings + root urls
@@ -56,8 +87,8 @@ fees/         fee structure, payments, receipts, dues
 timetable/    time slots, periods, weekly grids
 templates/    Bootstrap templates (base.html has the sidebar)
 static/css/   small custom stylesheet
+render.yaml   Render deploy settings (build, start, environment)
 ```
 
 ## Notes
-- `TIME_ZONE` in `config/settings.py` is `UTC`; change it to your local zone (e.g. `Asia/Kolkata`) so "today" matches your clock.
-- Before deploying, set these environment variables: `DJANGO_SECRET_KEY` (a long random string), `DJANGO_DEBUG=0`, and `DJANGO_ALLOWED_HOSTS` (comma-separated, e.g. `school.example.com`). Without them the app runs in local development mode.
+- The time zone defaults to `Asia/Kolkata` so "today" matches the school's clock; set `DJANGO_TIME_ZONE` (e.g. `UTC`) to change it.
